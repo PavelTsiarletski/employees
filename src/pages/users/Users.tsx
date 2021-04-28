@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getRequest, postRequest, putRequest } from '../../base/api-requests';
+import { getRequest } from '../../base/api-requests';
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControl,
   InputLabel,
   makeStyles,
@@ -15,22 +11,20 @@ import {
 } from '@material-ui/core';
 
 import {
-  Avatar,
   Circle,
   FilterPaper,
   MenuItemText,
-  UserPaper,
   UserList,
   FilterContainer,
 } from './users.styled';
+import UserDialog from './components/UserDialog';
+import User from './components/User';
 
 const Users = () => {
   // state
   const [usersList, setUsersList] = useState([]);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [open, setOpen] = useState(false);
-  const [username, setUsername] = useState('');
-  const [status, setStatus] = useState('');
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
   const [searchList, setSearchList] = useState([]);
@@ -104,46 +98,8 @@ const Users = () => {
       ? searchList
       : usersList;
 
-  const User = (props: any) => {
-    const { index, u } = props;
-    return (
-      <UserPaper key={index + u.id + u.username}>
-        <Avatar src={u.photo} alt="avatar" loading="lazy" />
-        <div>
-          <h4>{u.username}</h4>
-          <Select
-            defaultValue={u.status}
-            onChange={(e) => {
-              putRequest(`/users`, {
-                status: e.target.value,
-                userId: u.id,
-              }).then(() => {
-                let users = usersList;
-                let user: any = users.find((user: any) => user.id === u.id);
-                user.status = e.target.value;
-                setUsersList(users);
-              });
-            }}
-          >
-            {statuses.map((status, index) => (
-              <MenuItem
-                value={status.value}
-                key={status.name + status.color + index}
-              >
-                <MenuItemText style={{ display: 'flex' }}>
-                  <Circle color={status.color} />
-                  {status.name}
-                </MenuItemText>
-              </MenuItem>
-            ))}
-          </Select>
-        </div>
-      </UserPaper>
-    );
-  };
-
-  const Filter = () => {
-    return (
+  return (
+    <>
       <FilterPaper>
         <Button
           variant="contained"
@@ -191,85 +147,30 @@ const Users = () => {
           </FormControl>
         </FilterContainer>
       </FilterPaper>
-    );
-  };
-
-  const UserDialog = () => {
-    return (
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Create new employee</DialogTitle>
-        <DialogContent>
-          <div>
-            <TextField
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
-            <br />
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="grouped-select">status</InputLabel>
-              <Select
-                onChange={(e: any) => {
-                  setStatus(e.target.value);
-                }}
-              >
-                {statuses.map((status, index) => (
-                  <MenuItem
-                    value={status.value}
-                    key={status.name + status.color + index}
-                  >
-                    <MenuItemText style={{ display: 'flex' }}>
-                      <Circle color={status.color} />
-                      {status.name}
-                    </MenuItemText>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              let params = {
-                username: username.length > 0 ? username : null,
-                status: status.length > 0 ? status : null,
-              };
-              postRequest('/users/create', params).then(() => {
-                handleClose();
-                setShouldUpdate(true);
-              });
-            }}
-            color="primary"
-            style={{ color: 'white' }}
-            variant="contained"
-          >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
-
-  return (
-    <>
-      <Filter />
       <UserList>
         {data
           ? data.map((u: any, index: number) => {
-              return <User key={index + u.id + u.username} u={u} />;
+              return (
+                <User
+                  key={index + u.id + u.username}
+                  u={u}
+                  usersList={usersList}
+                  statuses={statuses}
+                  index={index}
+                  setUsersList={setUsersList}
+                />
+              );
             })
           : null}
       </UserList>
-      <UserDialog />
+      <UserDialog
+        open={open}
+        setOpen={setOpen}
+        statuses={statuses}
+        classes={classes}
+        setShouldUpdate={setShouldUpdate}
+        handleClose={handleClose}
+      />
     </>
   );
 };
