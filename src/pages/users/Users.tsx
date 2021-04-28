@@ -25,6 +25,7 @@ import {
 } from './users.styled';
 
 const Users = () => {
+  // state
   const [usersList, setUsersList] = useState([]);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [open, setOpen] = useState(false);
@@ -141,8 +142,8 @@ const Users = () => {
     );
   };
 
-  return (
-    <>
+  const Filter = () => {
+    return (
       <FilterPaper>
         <Button
           variant="contained"
@@ -190,14 +191,11 @@ const Users = () => {
           </FormControl>
         </FilterContainer>
       </FilterPaper>
+    );
+  };
 
-      <UserList>
-        {data
-          ? data.map((u: any, index: number) => {
-              return <User key={index + u.id + u.username} u={u} />;
-            })
-          : null}
-      </UserList>
+  const UserDialog = () => {
+    return (
       <Dialog
         open={open}
         onClose={handleClose}
@@ -258,6 +256,20 @@ const Users = () => {
           </Button>
         </DialogActions>
       </Dialog>
+    );
+  };
+
+  return (
+    <>
+      <Filter />
+      <UserList>
+        {data
+          ? data.map((u: any, index: number) => {
+              return <User key={index + u.id + u.username} u={u} />;
+            })
+          : null}
+      </UserList>
+      <UserDialog />
     </>
   );
 };
